@@ -45,17 +45,19 @@ class CustomTokenObtainSerializer(TokenObtainSerializer):
 
 
 class PasswordResetSerializer(serializers.Serializer):
-    password = serializers.CharField(max_length=255, required=True, write_only=True)
-    _password = serializers.CharField(max_length=255, required=True, write_only=True)
+    password = serializers.CharField(max_length=255, write_only=True, required=True)
+    confirm_password = serializers.CharField(max_length=255, write_only=True, required=True)
 
     def validate(self, attrs):
-        password = attrs.get('password')
-        _password = attrs.get('_password')
-        if password and _password:
-            raise serializers.ValidationError(_("Passwords aren't match"))
-        try:
-            validate_password(password)
-        except serializers.ValidationError as e:
-            raise serializers.ValidationError({"password": list(e.messages)})
+        validated_data = super().validate(attrs)
+        email = attrs.get('email')
+        user = CustomUser.objects.get(email=email)
+        if user is not None:
+            return validated_data
+        else:
+            return serializers.ValidationError(_("Email doesn't exist"))
 
-        return  super().validate(attrs)
+
+class ResetPasswordRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
