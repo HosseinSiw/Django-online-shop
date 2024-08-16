@@ -29,10 +29,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class PasswordResetModel(models.Model):
+    """
+    This Model represents the password reset process of each user
+    """
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     times = models.IntegerField(default=0, validators=[MaxValueValidator(5)])
     token = models.CharField(max_length=255)
-    created_time = models.DateTimeField(auto_now_add=True, default=datetime.now())
+    created_time = models.DateTimeField(auto_now_add=True,)
     verified = models.BooleanField(default=True)
 
     def __str__(self):
