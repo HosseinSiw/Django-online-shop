@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser
+from .models import CustomUser, PasswordResetModel
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 
@@ -15,9 +15,10 @@ class UserAdmin(BaseUserAdmin):
         ("dates", {'fields': ('last_login',)}),
     )
     add_fieldsets = (
-        ("Personal Info", {"fields": ('username', 'email', '<PASSWORD>', '<PASSWORD>')}),
+        ("Personal Info", {"fields": ('username', 'email', 'password1', 'password2')}),
         ("Permissions",  {'fields': ("is_active", "is_staff", "is_superuser", "is_verified")},)
     )
 
 
 admin.site.register(CustomUser, UserAdmin)
+admin.site.register(PasswordResetModel)

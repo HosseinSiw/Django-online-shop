@@ -150,7 +150,7 @@ SIMPLE_JWT = {
 }
 
 # SMTP4DEV configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp4dev'  # The name of the smtp4dev service in docker-compose
 EMAIL_PORT = 2525
 EMAIL_USE_TLS = False

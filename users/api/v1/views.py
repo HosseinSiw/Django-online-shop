@@ -1,14 +1,16 @@
 from django.conf import settings
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from ..utils import get_token_for_user
 from rest_framework.generics import GenericAPIView
-from .serializers import UserSerializer, CustomTokenObtainPairSerializer
+from .serializers import UserSerializer, CustomTokenObtainPairSerializer, PasswordResetConfirmSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.shortcuts import get_object_or_404
 from mail_templated import EmailMessage
 from ...models import CustomUser as User
+from ...models import PasswordResetModel
 from ..utils import EmailThread
 import jwt
 
@@ -60,3 +62,31 @@ class UserVerificationEndPoint(APIView):
         else:
             return Response({"msg": "your account isn't registered, register first."},
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+class ForgotPasswordRequestView(APIView):
+    def get(self, request, *args, **kwargs):
+        user_id = kwargs.get('user_id')
+        user = get_object_or_404(User, pk=user_id)
+        reset_model = PasswordResetModel.objects.get(user=user)  # We use get, because this object creates for each user
+        token = reset_model.generate_reset_token()
+        email_obj = EmailMessage(
+            template_name='email/forgot_password.tpl',
+            context={'token': token, "user": user},
+            to=[user.email],
+            from_email="admin@admin.com"
+        )
+        EmailThread(email_obj).start()
+        return Response({"msg": "your password reset email has been sent successfully"}, status=status.HTTP_200_OK)
+
+
+class ForgotPasswordConfirmView(GenericAPIView):
+    serializer_class = PasswordResetConfirmSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, token: str, *args, **kwargs):
+        reset_model = PasswordResetModel.objects.filter(user=request.user).last()
+        if reset_model is not None and reset_model.token == token:
+            return Response({"msg": "Valid token.",}, status=status.HTTP_200_OK)
+        else:
+            return Response({"msg": "Invalid Token"}, status=status.HTTP_400_BAD_REQUEST)

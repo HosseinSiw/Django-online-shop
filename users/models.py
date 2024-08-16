@@ -1,3 +1,6 @@
+import uuid
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 from django.core.validators import MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -20,7 +23,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(auto_now_add=True, null=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['username',]
 
     objects = CustomUserManager()
 
@@ -30,7 +33,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class PasswordResetModel(models.Model):
     """
-    This Model represents the password reset process of each user
+    This Model represents the password reset process of each user, and its created whenever a new user is created.
     """
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     times = models.IntegerField(default=0, validators=[MaxValueValidator(5)])
@@ -39,7 +42,10 @@ class PasswordResetModel(models.Model):
     verified = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"User: {self.user.unsername} - {self.token} - times: {str(self.times)}"
+        if self.times == 0:
+            return f"User: {self.user.username} - zero times"
+        else:
+            return f"User: {self.user.username} - {self.token} - times: {str(self.times)}"
 
     def times_valid(self):
         if self.times < 5:
@@ -52,3 +58,15 @@ class PasswordResetModel(models.Model):
             return True
         else:
             return False
+
+    def generate_reset_token(self):
+        self.token = str(uuid.uuid4())
+        self.times += 1
+        return self.token
+
+
+# Signal which create a Password reset instance when a user creates.
+@receiver(post_save, sender=CustomUser)
+def create_user_reset_model(sender, instance, created, **kwargs):
+    if created:
+        PasswordResetModel.objects.create(user=instance, times=0, )

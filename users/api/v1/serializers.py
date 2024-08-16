@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from ...models import CustomUser
+from ...models import CustomUser, PasswordResetModel
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -21,7 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
         :return: a new user instance
         """
         validated_data.pop('password1', None)
-        return CustomUser.objects.create_user(email=validated_data['email'],password=validated_data['password'],
+        return CustomUser.objects.create_user(email=validated_data['email'], password=validated_data['password'],
                                               username=validated_data['username'])
 
     def validate(self, attrs):
@@ -49,3 +49,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         validated_data['email'] = self.user.email
         validated_data['username'] = self.user.username
         return validated_data
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    password_field = serializers.CharField(max_length=255)
+    validate_password_field = serializers.SerializerMethodField(method_name='validate_password_field')
+
+    def validate_password_field(self):
+        try:
+            validate_password(self.password_field)
+        except:
+            raise serializers.ValidationError({"password": msg("Invalid password")})
