@@ -34,6 +34,9 @@ class Product(models.Model):
     def get_relative_url(self):
         return f'/shoes/{self.slug}/'
 
+    def get_owner_username(self):
+        return self.owner.username
+
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
