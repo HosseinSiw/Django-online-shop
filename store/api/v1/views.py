@@ -6,8 +6,11 @@ from .serializers import ProductSerializer
 from store.models import Product
 
 
-class HomeView(generics.ListCreateAPIView):
+class ProductHomeView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
     permission_classes = (AllowAny,)
     queryset = Product.objects.filter(is_active=True)
 
+
+class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
+    pass
