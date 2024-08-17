@@ -38,11 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    "users.apps.UsersConfig",
-    "rest_framework",
+    "users.apps.UsersConfig",  # Custom User Application.
+    "store.apps.StoreConfig",  # Store app configuration.
+    "rest_framework",  # Djagno Rest Framework.
     'rest_framework_simplejwt',  # SimpleJWT Login.
-    "drf_yasg",  # API Documentation
-    'mail_templated',  # Templated Email sending package
+    "drf_yasg",  # API Documentation.
+    'mail_templated',  # Templated Email sending package.
 ]
 
 MIDDLEWARE = [
