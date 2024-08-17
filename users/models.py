@@ -22,6 +22,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     # Dating Information
     date_joined = models.DateTimeField(auto_now_add=True, null=True)
 
+    # Password information
+    password_reset_times = models.IntegerField(default=0)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username',]
 

@@ -15,6 +15,6 @@ services:
     container_name: smtp4dev
     ports:
       - "3000:80"   # Web interface
-      - "2525:25"   # SMTP port
+      - "25:25"   # SMTP port
     environment:
       - ASPNETCORE_ENVIRONMENT=Development

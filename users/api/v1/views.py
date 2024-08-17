@@ -12,7 +12,6 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.shortcuts import get_object_or_404
 from mail_templated import EmailMessage
 from ...models import CustomUser as User
-from ...models import PasswordResetModel
 from ..utils import EmailThread
 import jwt
 
@@ -66,11 +65,18 @@ class UserVerificationEndPoint(APIView):
 
 
 class ForgotPasswordRequestView(APIView):
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+        """
+        In this case we used Email and JWT Token, you can configure your approach appropriately. such as sending sms,
+        or other approaches.
+        :param request: The main request packet.
+        :param args: args
+        :param kwargs: kwargs
+        :return: It sends A concurrent email and a response with 200 status code.
+        """
         user_id = kwargs.get('username')
         user = get_object_or_404(User, username=user_id)
         token = get_token_for_user(user)
-        # We use get, because this object creates for each user
         url = request.build_absolute_uri(
             reverse('users:api-urls:reset_password', kwargs={'token': token})
         )
@@ -80,13 +86,19 @@ class ForgotPasswordRequestView(APIView):
             to=[user.email],
             from_email="admin@admin.com"
         )
-        EmailThread(email_obj).start()
-        return Response({"msg": "your password reset email has been sent successfully"}, status=status.HTTP_200_OK)
+        if user.password_reset_times <= 5:
+            user.password_reset_times += 1
+            EmailThread(email_obj).start()
+            return Response({"msg": "your password reset email has been sent successfully"},
+                            status=status.HTTP_200_OK)
+        else:
+            return Response({"msg": "your password reset email doesn't sent, you aren't able to reset your password"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class ForgotPasswordConfirmView(GenericAPIView):
     serializer_class = PasswordResetSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)  # Allow any user to access this view
 
     def post(self, request, token, *args, **kwargs):
         try:
@@ -94,15 +106,20 @@ class ForgotPasswordConfirmView(GenericAPIView):
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
             user = User.objects.get(id=payload['user_id'])
         except jwt.ExpiredSignatureError:
-            raise ValidationError({"error": "Token has expired."})
+            return Response({"error": "Token has expired."}, status=status.HTTP_400_BAD_REQUEST)
         except jwt.InvalidTokenError:
-            raise ValidationError({"error": "Invalid token."})
+            return Response({"error": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
-            raise ValidationError({"error": "Invalid token or user does not exist."})
+            return Response({"error": "User does not exist."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Validate and update the password
         serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid() and user.password == serializer.validated_data['old_password']:
-            user.set_password(serializer.validated_data['password_1'])
-            user.save()
-        return Response({'message': 'Password has been reset successfully.'}, status=status.HTTP_200_OK)
+        if serializer.is_valid():
+            if user.check_password(serializer.validated_data['old_password']):
+                user.set_password(serializer.validated_data['password_1'])
+                user.save()
+                return Response({'message': 'Password has been reset successfully.'}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Old password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
