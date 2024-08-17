@@ -12,7 +12,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     # Personal Information
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
-    username = models.CharField(max_length=255, unique=True)
+    username = models.CharField(max_length=255, unique=True,)
     # Permissions
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

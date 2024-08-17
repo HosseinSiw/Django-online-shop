@@ -1,11 +1,13 @@
 from django.conf import settings
+from django.urls import reverse
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from ..utils import get_token_for_user
 from rest_framework.generics import GenericAPIView
-from .serializers import UserSerializer, CustomTokenObtainPairSerializer, PasswordResetConfirmSerializer
+from .serializers import UserSerializer, CustomTokenObtainPairSerializer, PasswordResetSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.shortcuts import get_object_or_404
 from mail_templated import EmailMessage
@@ -40,8 +42,7 @@ class UserRegistrationEndPoint(GenericAPIView):
                 "msg": "your account created successfully check your inbox and verify your account",
             }
             return Response(data=data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -66,13 +67,16 @@ class UserVerificationEndPoint(APIView):
 
 class ForgotPasswordRequestView(APIView):
     def get(self, request, *args, **kwargs):
-        user_id = kwargs.get('user_id')
-        user = get_object_or_404(User, pk=user_id)
-        reset_model = PasswordResetModel.objects.get(user=user)  # We use get, because this object creates for each user
-        token = reset_model.generate_reset_token()
+        user_id = kwargs.get('username')
+        user = get_object_or_404(User, username=user_id)
+        token = get_token_for_user(user)
+        # We use get, because this object creates for each user
+        url = request.build_absolute_uri(
+            reverse('users:api-urls:reset_password', kwargs={'token': token})
+        )
         email_obj = EmailMessage(
             template_name='email/forgot_password.tpl',
-            context={'token': token, "user": user},
+            context={"user": user, "url": url},
             to=[user.email],
             from_email="admin@admin.com"
         )
@@ -81,12 +85,24 @@ class ForgotPasswordRequestView(APIView):
 
 
 class ForgotPasswordConfirmView(GenericAPIView):
-    serializer_class = PasswordResetConfirmSerializer
+    serializer_class = PasswordResetSerializer
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, token: str, *args, **kwargs):
-        reset_model = PasswordResetModel.objects.filter(user=request.user).last()
-        if reset_model is not None and reset_model.token == token:
-            return Response({"msg": "Valid token.",}, status=status.HTTP_200_OK)
-        else:
-            return Response({"msg": "Invalid Token"}, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, token, *args, **kwargs):
+        try:
+            # Decode the JWT token
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            user = User.objects.get(id=payload['user_id'])
+        except jwt.ExpiredSignatureError:
+            raise ValidationError({"error": "Token has expired."})
+        except jwt.InvalidTokenError:
+            raise ValidationError({"error": "Invalid token."})
+        except User.DoesNotExist:
+            raise ValidationError({"error": "Invalid token or user does not exist."})
+
+        # Validate and update the password
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid() and user.password == serializer.validated_data['old_password']:
+            user.set_password(serializer.validated_data['password_1'])
+            user.save()
+        return Response({'message': 'Password has been reset successfully.'}, status=status.HTTP_200_OK)

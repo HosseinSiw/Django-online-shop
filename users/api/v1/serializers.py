@@ -51,12 +51,17 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return validated_data
 
 
-class PasswordResetConfirmSerializer(serializers.Serializer):
-    password_field = serializers.CharField(max_length=255)
-    validate_password_field = serializers.SerializerMethodField(method_name='validate_password_field')
+class PasswordResetSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    password_1 = serializers.CharField(write_only=True, max_length=255)
+    password_2 = serializers.CharField(write_only=True, max_length=255)
 
-    def validate_password_field(self):
+    def validate(self, attrs):
         try:
-            validate_password(self.password_field)
-        except:
-            raise serializers.ValidationError({"password": msg("Invalid password")})
+            validate_password(attrs.get('password_1'))
+        except ValidationError as e:
+            return serializers.ValidationError({"error": list(e.messages)})
+        if attrs.get('password_2') != attrs.get('password_1'):
+            raise serializers.ValidationError({"error": msg("Passwords don't match")})
+
+        return super().validate(attrs)
