@@ -8,11 +8,16 @@ from ...models import Product
 class ProductSerializer(ModelSerializer):
     relative_url = serializers.ReadOnlyField(source='get_relative_url')
     absolute_url = serializers.SerializerMethodField(source='get_absolute_url')
-    owner = serializers.ReadOnlyField(source='get_owner_username')
+    owner_username = serializers.ReadOnlyField(source='get_owner_username')
+    owner_id = serializers.ReadOnlyField(source='get_owner_id')
+    category_name = serializers.ReadOnlyField(source='get_category_name')
 
     class Meta:
         model = Product
-        fields = ('id', "name", 'price', "stock", "size", "absolute_url", "relative_url", "owner")
+        fields = ('id', "name",
+                  'price', "stock", "size",
+                  "absolute_url", "relative_url",
+                  "owner_username", "owner_id", "category_name")
 
     def get_absolute_url(self, obj):
         request = self.context.get('request')
