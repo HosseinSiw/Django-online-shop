@@ -1,8 +1,9 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
-from ...models import Product
+from ...models import Product, CartItem
 
 
 class ProductSerializer(ModelSerializer):
@@ -37,3 +38,28 @@ class ProductSerializer(ModelSerializer):
             rep.pop("absolute_url", None)
             rep.pop("relative_url", None)
             return rep
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product', 'quantity']
+
+
+class AddToCartSerializer(serializers.Serializer):
+    """
+    I defined this serializer class for validation purposes.
+    """
+    product_id = serializers.IntegerField()
+    quantity = serializers.IntegerField(default=1,)
+
+    def validate_quantity(self, value):
+        if value < 1:
+            raise serializers.ValidationError(_("Quantity must be greater than 0."))
+
+    def validate_product_id(self, value):
+        try:
+            Product.objects.get(pk=value)
+        except Product.DoesNotExist:
+            raise serializers.ValidationError("Product does not exist.")
+        return value
