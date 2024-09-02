@@ -3,7 +3,7 @@ from rest_framework.serializers import ModelSerializer
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from ...models import Product, CartItem
+from ...models import Product, CartItem, Cart
 
 
 class ProductSerializer(ModelSerializer):
@@ -44,6 +44,12 @@ class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = ['id', 'product', 'quantity']
+
+
+class CartSerializer(ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = '__all__'
 
 
 class AddToCartSerializer(serializers.Serializer):

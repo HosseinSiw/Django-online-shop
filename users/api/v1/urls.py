@@ -18,5 +18,5 @@ urlpatterns = [
     path("forgot-password/<str:username>/", views.ForgotPasswordRequestView.as_view(), name='forgot_password'),
     path("reset-password/<str:token>/", views.ForgotPasswordConfirmView.as_view(), name='reset_password'),
     # being a seller endpoint.
-    # path("selling/", views.SetUserAsSeller.as_view(), name='seller',),
+    # path("be-a-seller/", views.SetUserAsSeller.as_view(), name='seller',),
 ]

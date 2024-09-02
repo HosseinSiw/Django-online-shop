@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,10 +8,11 @@ from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 
-from .serializers import ProductSerializer, AddToCartSerializer
+from .serializers import ProductSerializer, AddToCartSerializer, CartSerializer
 from .permissions import IsOwnerOrReadOnly
 from store.models import Product, CartItem, Cart
 from .paginators import CustomProductPaginator
+from users.models import CustomUser as User
 
 
 class ProductHomeView(generics.ListCreateAPIView):
@@ -39,28 +41,33 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class AddToCartView(APIView):
     """
-    This class handles adding a product to the cart of requested user. Todo: This is an incorrect implementation.
+    Currently It works appropriately, but it needs enhancement (enrichment).
+    This class handles adding a product to the cart of the requested user.
     Tips:
-        1. Adding to a cart is an Update operation and nothing else, because we are currently use signals to create
-            a cart for each user whenever it registered.
-        2. We dont need get and post methods in this endpoint, delete them if there are existed.
+        1. Adding to a cart is an Update operation and nothing else, because we are currently using signals to create
+            a cart for each user whenever it is registered.
+        2. We don't need `get` and `post` methods in this endpoint, delete them if they exist.
     """
     serializer_class = AddToCartSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)  # TODO: Change it to (IsAuthenticated,)
 
-    def get(self, request, id, *args, **kwargs):
-        product = get_object_or_404(Product, id=id)
-        serializer = self.serializer_class(data=request.data)
+    def post(self, request, id, *args, **kwargs):
+        data = {
+            'product_id': id,
+            'quantity': 1,
+        }
+        serializer = self.serializer_class(data=data)
         if serializer.is_valid():
             user = request.user
             product_id = serializer.validated_data['product_id']
-            quantity = serializer.validated_data['quantity']
+
 
             product = get_object_or_404(Product, pk=product_id)
             cart = Cart.objects.get(user=user)
 
-            cart_item, created = CartItem.objects.get_or_create(product=product, quantity=quantity, cart=cart)
-            cart_item.quantity += quantity
+            # Check if the CartItem already exists; if so, update the quantity.
+            cart_item, created = CartItem.objects.get_or_create(product=product, cart=cart)
+            cart_item.quantity += 1
             cart_item.save()
 
             return Response({
@@ -69,3 +76,14 @@ class AddToCartView(APIView):
             }, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MyCardView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CartSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        user_id = self.request.user.id
+        print("User ID: ", user_id)
+        user = get_object_or_404(User, id=user_id)
+        return get_object_or_404(Cart, user=user)
