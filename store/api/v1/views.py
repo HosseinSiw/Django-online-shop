@@ -29,6 +29,7 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
     permission_classes = (IsOwnerOrReadOnly,)
     lookup_field = 'slug'
+
     # queryset = Product.objects.all(), we dont use this type of queryset, instead we use get_queryset method.
 
     def get_queryset(self):
@@ -60,7 +61,6 @@ class AddToCartView(APIView):
         if serializer.is_valid():
             user = request.user
             product_id = serializer.validated_data['product_id']
-
 
             product = get_object_or_404(Product, pk=product_id)
             cart = Cart.objects.get(user=user)
