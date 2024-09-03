@@ -8,7 +8,7 @@ from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 
-from .serializers import ProductSerializer, AddToCartSerializer, CartSerializer
+from .serializers import ProductSerializer, AddToCartSerializer, CartSerializer, CartItemSerializer
 from .permissions import IsOwnerOrReadOnly
 from store.models import Product, CartItem, Cart
 from .paginators import CustomProductPaginator
@@ -41,33 +41,31 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class AddToCartView(APIView):
-    """
-    Currently It works appropriately, but it needs enhancement (enrichment).
-    This class handles adding a product to the cart of the requested user.
-    Tips:
-        1. Adding to a cart is an Update operation and nothing else, because we are currently using signals to create
-            a cart for each user whenever it is registered.
-        2. We don't need `get` and `post` methods in this endpoint, delete them if they exist.
-    """
-    serializer_class = AddToCartSerializer
-    permission_classes = (permissions.IsAuthenticated,)  # TODO: Change it to (IsAuthenticated,)
+    serializer_class = CartItemSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, id, *args, **kwargs):
+        quantity = request.data.get('quantity', 1)  # Allow dynamic quantity input
         data = {
             'product_id': id,
-            'quantity': 1,
+            'quantity': quantity,
         }
         serializer = self.serializer_class(data=data)
         if serializer.is_valid():
             user = request.user
-            product_id = serializer.validated_data['product_id']
-
-            product = get_object_or_404(Product, pk=product_id)
+            product = get_object_or_404(Product, pk=id)
             cart = Cart.objects.get(user=user)
 
             # Check if the CartItem already exists; if so, update the quantity.
             cart_item, created = CartItem.objects.get_or_create(product=product, cart=cart)
-            cart_item.quantity += 1
+            cart_item.quantity += quantity
+
+            # Validate if the quantity does not exceed available stock
+            if cart_item.quantity > product.stock:
+                return Response({
+                    'error': 'Quantity exceeds available stock.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
             cart_item.save()
 
             return Response({
@@ -78,12 +76,40 @@ class AddToCartView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MyCardView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated,)
+class MyCartView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = CartSerializer
 
-    def get_queryset(self, *args, **kwargs):
-        user_id = self.request.user.id
-        print("User ID: ", user_id)
-        user = get_object_or_404(User, id=user_id)
-        return get_object_or_404(Cart, user=user)
+    def get_object(self):
+        user = self.request.user
+        cart = get_object_or_404(Cart, user=user)
+        return cart
+
+
+class RemoveFromCartView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, id, *args, **kwargs):
+        user = request.user
+        product = get_object_or_404(Product, pk=id)
+        cart = Cart.objects.get(user=user)
+        cart_item = get_object_or_404(CartItem, product=product, cart=cart)
+
+        cart_item.delete()
+
+        return Response({
+            'message': 'Product removed from cart'
+        }, status=status.HTTP_200_OK)
+
+
+class ClearCartView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        cart = get_object_or_404(Cart, user=user)
+        cart.clear()
+
+        return Response({
+            'message': 'Cart cleared'
+        }, status=status.HTTP_200_OK)

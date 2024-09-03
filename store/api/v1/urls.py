@@ -9,11 +9,13 @@ urlpatterns = [
     # A single product (detail page)
     path('<slug:slug>/', views.ProductDetailView.as_view(), name='product-details'),
     # Add to Card Endpoint.
-    path('add-to-card/<int:id>/', views.AddToCartView.as_view(), name='add-to-card'),
+    path('cart/add/<int:id>/', views.AddToCartView.as_view(), name='add-to-card'),
     # View Card Endpoint.
-    path('my-card/', views.MyCardView.as_view(), name='my-card'),
-    # Update Card Item Endpoint.
+    path('card/', views.MyCartView.as_view(), name='my-card'),
+
     # Remove Card Item Endpoint.
+    path('card/remove/<int:id>/', views.RemoveFromCartView.as_view(), name='remove'),
     # Clear Card Endpoint.
+    path("card/clear/", views.ClearCartView.as_view(), name='clear-cart'),
     # Apply Coupon to Card Endpoint.
 ]

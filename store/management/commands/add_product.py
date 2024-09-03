@@ -10,7 +10,12 @@ class Command(BaseCommand):
     email = "email@email.com"
     password = "test/123456"
     username = "TEST_USERNAME"
-
+    """
+    This command will create some random records in database.
+    Usage:
+        python manage.py add_product NUMBER_OF_INSTANCES
+        provide the number when you are using it, by default it will create one record and inject it in database.
+    """
     def add_arguments(self, parser):
         parser.add_argument("num_product", nargs=1, type=int)
 

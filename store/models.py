@@ -8,6 +8,10 @@ from django.dispatch import receiver
 
 from users.models import CustomUser as User
 
+from datetime import timedelta
+from django.utils import timezone
+
+
 size_choices = [(int(size), int(size)) for size in range(37, 46)]
 
 
@@ -122,6 +126,26 @@ class Cart(models.Model):
     @property
     def item_count(self):
         return self.items.count()
+
+    def clear_cart(self):
+        self.items.all().delete()
+
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=15, unique=True)
+    percent = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    valid_days = models.IntegerField(default=14)  # two weeks validation for each coupon by default.
+    expired = models.BooleanField(default=False)
+
+    def is_valid(self):
+        time_valid = self.created_at + timedelta(days=self.valid_days)
+        now = timezone.now()
+
+        if now < time_valid and not self.expired:
+            return True
+        else:
+            return False
 
 
 @receiver(post_save, sender=User)
