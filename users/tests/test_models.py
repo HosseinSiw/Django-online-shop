@@ -1,6 +1,5 @@
 from django.test import TestCase
 from django.contrib.auth import authenticate
-from django.db.models.signals import post_save
 from unittest.mock import patch
 
 from ..models import CustomUser as User

@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from ...models import CustomUser, PasswordResetModel
+from ...models import CustomUser
 
 
 class UserSerializer(serializers.ModelSerializer):

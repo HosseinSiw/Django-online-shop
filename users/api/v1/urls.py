@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
-app_name = 'api-urls'
+app_name = 'api-v1-urls'
 urlpatterns = [
     path("regiser", views.UserRegistrationEndPoint.as_view(), name="user-registration"),
     path("regiser/activation/<str:token>/", views.UserVerificationEndPoint.as_view(), name="user-activation"),
