@@ -89,7 +89,7 @@ class ForgotPasswordRequestView(APIView):
         if user.password_reset_times <= 5:
             user.password_reset_times += 1
             EmailThread(email_obj).start()
-            return Response({"msg": "your password reset email has been sent successfully"},
+            return Response({"msg": "your password reset email sent successfully"},
                             status=status.HTTP_200_OK)
         else:
             return Response({"msg": "your password reset email doesn't sent, you aren't able to reset your password"},
@@ -98,7 +98,7 @@ class ForgotPasswordRequestView(APIView):
 
 class ForgotPasswordConfirmView(GenericAPIView):
     serializer_class = PasswordResetSerializer
-    permission_classes = (IsAuthenticated,)  # Allow any user to access this view
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, token, *args, **kwargs):
         try:

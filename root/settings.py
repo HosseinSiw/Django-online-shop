@@ -40,6 +40,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "middleware.CustomLoggingMiddleware",
+    "middleware.AdminLoggingMiddleware",
 ]
 
 ROOT_URLCONF = 'root.urls'
@@ -150,3 +151,5 @@ DEFAULT_FROM_EMAIL = 'admin@admin.com'
 
 # Logging custom middleware configuration
 LOGGING_FILE_PATH = "logs/requests.logs"
+ADMIN_PANEL_URL = '/admin/'  # Change it for make your application more secure
+ADMIN_LOGGING_FILE_PATH = 'logs/admin-logs.logs'
