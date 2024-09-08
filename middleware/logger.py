@@ -31,7 +31,7 @@ class CustomLoggingMiddleware:
 
         # Log request details
         self.logger.info(
-            f'Request: {request.method} {request.path} | Status: {response.status_code} | Duration: {duration:.2f}s'
+            f'New Request: {request.method} {request.path} | Status: {response.status_code} | Duration: {duration:.2f}s\n\n'
         )
 
         return response
