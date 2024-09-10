@@ -23,6 +23,8 @@ INSTALLED_APPS = [
 
     "users.apps.UsersConfig",  # Custom User Application.
     "store.apps.StoreConfig",  # Store app configuration.
+    "orders.apps.OrdersConfig",  # Order manager application.
+
     "rest_framework",  # Djagno Rest Framework.
     'rest_framework_simplejwt',  # SimpleJWT Login.
     "drf_yasg",  # API Documentation.
@@ -39,6 +41,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # Custom middlewares
     "middleware.CustomLoggingMiddleware",
     "middleware.AdminLoggingMiddleware",
 ]

@@ -20,7 +20,7 @@ class Product(models.Model):
     The main product model.
     """
     owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, null=False, blank=False)
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -94,7 +94,7 @@ class CartItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
 
     def __str__(self):
-        return f"{self.quantity} x {self.product.name} in {self.cart.user.username}'s cart"
+        return f"{self.quantity} x {self.product.name}"
 
     @property
     def total_price(self):
@@ -146,6 +146,9 @@ class Coupon(models.Model):
             return True
         else:
             return False
+
+    def __str__(self):
+        return f"Code: {self.code}, Days: {self.valid_days}, Expired: {self.expired}"
 
 
 @receiver(post_save, sender=User)
