@@ -8,7 +8,7 @@ class Order(models.Model):
     order_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now_add=True)
-    shipping_address = models.TextField()
+    shipping_address = models.CharField(max_length=500)
 
     STATUS_CHOICES = [
         ("P", "Pending"),
@@ -17,6 +17,22 @@ class Order(models.Model):
         ("D", "Delivered",)
     ]
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="P")
+
+    @property
+    def items(self):
+        """
+        Enhance this method.
+        :return: a fucking dict !
+        """
+        names = {
+            "products": [],
+            "quantities": []
+        }
+        items = self.cart.items.all()
+        for item in items:
+            names['products'].append(item.product.name)
+            names['quantities'].append(item.quantity)
+        return names
 
     @property
     def order_total_price(self):
@@ -34,6 +50,7 @@ class Order(models.Model):
     shipping_method = models.CharField(max_length=3, choices=SHIPPING_METHOD_CHOICES, default="STD")
     order_notes = models.CharField(max_length=255, blank=True, null=True)
     coupon = models.ForeignKey('OrderCoupon', on_delete=models.SET_NULL, blank=True, null=True)
+
 
     def __str__(self):
         return f"Order by {self.cart.user.username} ID: {self.order_id}"
