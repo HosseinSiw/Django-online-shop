@@ -5,7 +5,7 @@ admin.site.register(OrderCoupon)
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('cart', 'order_date', 'order_total_price', 'status', "items")
+    list_display = ('cart', 'order_date', 'order_total_price', 'status', "purchased_items")
     list_filter = ('cart', 'order_date', 'status')
     date_hierarchy = 'order_date'
     ordering = ('order_date',)

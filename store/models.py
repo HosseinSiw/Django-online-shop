@@ -26,7 +26,7 @@ class Product(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.01'))]
     )
-    stock = models.PositiveIntegerField(default=0)  # Use PositiveIntegerField to enforce non-negative values
+    stock = models.PositiveIntegerField(default=1)  # Use PositiveIntegerField to enforce non-negative values
     size = models.IntegerField(choices=size_choices)
     category = models.ForeignKey('Category', on_delete=models.CASCADE, default=1)
 

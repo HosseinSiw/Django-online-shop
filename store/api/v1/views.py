@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.response import Response
@@ -41,11 +42,11 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class AddToCartView(APIView):
-    serializer_class = CartItemSerializer
+    serializer_class = AddToCartSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, id, *args, **kwargs):
-        quantity = request.data.get('quantity', 1)  # Allow dynamic quantity input
+        quantity = int(request.data.get('quantity', 1))  # Ensure quantity is an integer
         data = {
             'product_id': id,
             'quantity': quantity,
@@ -54,7 +55,8 @@ class AddToCartView(APIView):
         if serializer.is_valid():
             user = request.user
             product = get_object_or_404(Product, pk=id)
-            cart = Cart.objects.get(user=user)
+
+            cart, created = Cart.objects.get_or_create(user=user)
 
             # Check if the CartItem already exists; if so, update the quantity.
             cart_item, created = CartItem.objects.get_or_create(product=product, cart=cart)
@@ -76,14 +78,20 @@ class AddToCartView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MyCartView(generics.RetrieveUpdateDestroyAPIView):
+class MyCartView(GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = CartSerializer
 
-    def get_object(self):
-        user = self.request.user
-        cart = get_object_or_404(Cart, user=user)
-        return cart
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        cart = Cart.objects.filter(user=user).first()
+        if not cart:
+            return Response({
+                'error': 'No cart found for this user.'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(cart)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class RemoveFromCartView(APIView):

@@ -19,20 +19,17 @@ class Order(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="P")
 
     @property
-    def items(self):
+    def purchased_items(self):
         """
         Enhance this method.
         :return: a fucking dict !
         """
-        names = {
-            "products": [],
-            "quantities": []
-        }
+        values = []
         items = self.cart.items.all()
         for item in items:
-            names['products'].append(item.product.name)
-            names['quantities'].append(item.quantity)
-        return names
+            values.append(f'{item.product.name} ({item.product.id}) * {item.quantity}\n')
+
+        return values
 
     @property
     def order_total_price(self):
@@ -50,7 +47,6 @@ class Order(models.Model):
     shipping_method = models.CharField(max_length=3, choices=SHIPPING_METHOD_CHOICES, default="STD")
     order_notes = models.CharField(max_length=255, blank=True, null=True)
     coupon = models.ForeignKey('OrderCoupon', on_delete=models.SET_NULL, blank=True, null=True)
-
 
     def __str__(self):
         return f"Order by {self.cart.user.username} ID: {self.order_id}"

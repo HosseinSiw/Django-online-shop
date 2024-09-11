@@ -2,3 +2,4 @@ venv
 */migrations
 /users/migrations/
 logs
+blueprint.txt

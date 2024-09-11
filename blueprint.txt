@@ -1,0 +1,1 @@
+Now I've developed a good status of the project, but we have some errors, so your next step will be testing store views
