@@ -85,8 +85,6 @@ class Category(models.Model):
         return self.name
 
 
-
-
 class Coupon(models.Model):
     code = models.CharField(max_length=15, unique=True)
     percent = models.PositiveIntegerField()
