@@ -1,7 +1,11 @@
 from django.test import TestCase
+
+from django.test import TestCase
 from decimal import Decimal
-from ..models import Product, Cart, CartItem, Category
+from cart.models import Cart, CartItem
 from users.models import CustomUser as User
+
+from store.models import Product, Category
 
 
 class CartModelTest(TestCase):
@@ -75,3 +79,5 @@ class CartModelTest(TestCase):
     def test_cart_str_representation(self):
         # Test the __str__ method of Cart
         self.assertEqual(str(self.cart), f'Cart of {self.user.username}')
+
+# Create your tests here.

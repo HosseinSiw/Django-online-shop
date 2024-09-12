@@ -1,6 +1,4 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,13 +7,12 @@ from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 
-from .serializers import ProductSerializer, AddToCartSerializer, CartSerializer, CartItemSerializer
+from .serializers import ProductSerializer, AddToCartSerializer
 from .permissions import IsOwnerOrReadOnly
-from store.models import Product, CartItem, Cart
-from .paginators import CustomProductPaginator
-from users.models import CustomUser as User
+from store.models import Product
 
-from rest_framework.decorators import api_view
+from cart.models import Cart, CartItem
+from .paginators import CustomProductPaginator
 
 
 class ProductHomeView(generics.ListCreateAPIView):
@@ -81,6 +78,12 @@ class AddToCartView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+"""
+class MyCartViewEndpoint(APIView):
+    def get(self, request, *args, **kwargs):
+        return Response({"details": "View hit successfully"}, status=status.HTTP_200_OK)
+
+
 class MyCartView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = CartSerializer
@@ -131,3 +134,4 @@ class ClearCartView(APIView):
         return Response({
             'message': 'Cart cleared'
         }, status=status.HTTP_200_OK)
+"""

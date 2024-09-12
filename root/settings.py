@@ -23,6 +23,7 @@ INSTALLED_APPS = [
 
     "users.apps.UsersConfig",  # Custom User Application.
     "store.apps.StoreConfig",  # Store app configuration.
+    "cart.apps.CartConfig",  # Cart management app.
     "orders.apps.OrdersConfig",  # Order manager application.
 
     "rest_framework",  # Djagno Rest Framework.

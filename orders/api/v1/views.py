@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from orders.api.v1.serializers import OrderSerializer
 from orders.models import Order
-from store.models import Cart
+from cart.models import Cart
 
 
 class OrderListAPIView(APIView):

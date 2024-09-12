@@ -1,7 +1,7 @@
 from django.db import models
 import uuid
 
-from store.models import Cart
+from cart.models import Cart
 
 
 class Order(models.Model):

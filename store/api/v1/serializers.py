@@ -3,7 +3,8 @@ from rest_framework.serializers import ModelSerializer
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from ...models import Product, CartItem, Cart
+from ...models import Product
+from cart.models import Cart, CartItem
 
 
 class ProductSerializer(ModelSerializer):
@@ -38,36 +39,6 @@ class ProductSerializer(ModelSerializer):
             rep.pop("absolute_url", None)
             rep.pop("relative_url", None)
             return rep
-
-
-class CartItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer()
-
-    class Meta:
-        model = CartItem
-        fields = ['id', 'product', 'quantity']
-
-
-"""
-class CartSerializer(ModelSerializer):
-    total_price = serializers.SerializerMethodField(source="get_total_price")
-    items = CartItemSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Cart
-        fields = ('user', "items", "total_price")
-
-    def get_total_price(self, obj):
-        return obj.total_price
-"""
-
-
-class CartSerializer(ModelSerializer):
-    items = CartItemSerializer()
-
-    class Meta:
-        model = Cart
-        fields = ("user", "items",)
 
 
 class AddToCartSerializer(serializers.Serializer):
