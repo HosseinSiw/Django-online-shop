@@ -15,6 +15,8 @@ from store.models import Product, CartItem, Cart
 from .paginators import CustomProductPaginator
 from users.models import CustomUser as User
 
+from rest_framework.decorators import api_view
+
 
 class ProductHomeView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
@@ -53,10 +55,10 @@ class AddToCartView(APIView):
         }
         serializer = self.serializer_class(data=data)
         if serializer.is_valid():
-            user = request.user
+            user = request.user  # Because this endpoint is for authenticated users.
             product = get_object_or_404(Product, pk=id)
 
-            cart, created = Cart.objects.get_or_create(user=user)
+            cart = Cart.objects.get(user=user)
 
             # Check if the CartItem already exists; if so, update the quantity.
             cart_item, created = CartItem.objects.get_or_create(product=product, cart=cart)
@@ -72,17 +74,19 @@ class AddToCartView(APIView):
 
             return Response({
                 'message': 'Product added to cart',
-                'cart_item_quantity': cart_item.quantity
+                'cart_item_quantity': cart_item.quantity,
+                "product name": product.name,
+                "product owner": product.owner.username,
             }, status=status.HTTP_200_OK)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MyCartView(GenericAPIView):
+class MyCartView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = CartSerializer
 
     def get(self, request, *args, **kwargs):
+        # print(request.user.id)
         user = request.user
         cart = Cart.objects.filter(user=user).first()
         if not cart:
@@ -92,6 +96,23 @@ class MyCartView(GenericAPIView):
 
         serializer = self.serializer_class(cart)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET",])
+def get_cart_by_user_test(request,):
+    user = request.user
+    print(user)
+    # try:
+    #     cart = Cart.objects.get(user=user)
+    # except Cart.DoesNotExist:
+    #     return Response({"detail": "No cart found for this user."}, status=status.HTTP_404_NOT_FOUND)
+    #
+    # # serializer = CartSerializer(cart)
+    data = {
+        # "cart": cart.id,
+        "user": user.username,
+    }
+    # return Response(data, status=status.HTTP_200_OK)
 
 
 class RemoveFromCartView(APIView):

@@ -91,7 +91,7 @@ class CartItem(models.Model):
     """
     cart = models.ForeignKey("Cart", on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, related_name='items', on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
+    quantity = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
@@ -109,7 +109,8 @@ class CartItem(models.Model):
 
 class Cart(models.Model):
     """
-    This model will represent the card of each user, and it will create whenever a user registered.
+    This model will represent the card of each user, and it will create whenever a user registered via a signal
+    named: create_user_cart.
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True,)
