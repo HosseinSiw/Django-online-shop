@@ -3,11 +3,13 @@ from .models import Product, Category, Cart, CartItem, Coupon
 
 
 class CartAdmin(admin.ModelAdmin):
-    list_display = ('user', 'created_at', 'total_price', "item_count")
+    list_display = ('user', 'total_price', "item_count", "item_names")
     empty_value_display = 'N/A'
+    readonly_fields = ("user",)
 
     fieldsets = (
         ("User info", {"fields": ("user",)}),
+        # ("Cart info", {"fields": ("total_price", "item_count",)})
     )
 
 

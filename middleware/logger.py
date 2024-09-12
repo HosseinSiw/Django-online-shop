@@ -45,11 +45,9 @@ class AdminLoggingMiddleware(MiddlewareMixin):
         super().__init__(get_response)
         self.get_response = get_response
 
-        # Create a logger for admin requests
         self.logger = logging.getLogger('admin_logger')
         log_file_path = getattr(settings, 'ADMIN_LOGGING_FILE_PATH', 'logs/admin-logs.logs')
 
-        # Check if the logger already has handlers to avoid duplicate logs
         if not self.logger.hasHandlers():
             handler = logging.FileHandler(log_file_path)
             handler.setLevel(logging.INFO)

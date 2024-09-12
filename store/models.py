@@ -128,6 +128,11 @@ class Cart(models.Model):
     def item_count(self):
         return self.items.count()
 
+    @property
+    def item_names(self):
+        items = self.items.all()
+        return [item.product.name for item in items]
+
     def clear_cart(self):
         self.items.all().delete()
 

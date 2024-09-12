@@ -100,19 +100,8 @@ class MyCartView(APIView):
 
 @api_view(["GET",])
 def get_cart_by_user_test(request,):
-    user = request.user
-    print(user)
-    # try:
-    #     cart = Cart.objects.get(user=user)
-    # except Cart.DoesNotExist:
-    #     return Response({"detail": "No cart found for this user."}, status=status.HTTP_404_NOT_FOUND)
-    #
-    # # serializer = CartSerializer(cart)
-    data = {
-        # "cart": cart.id,
-        "user": user.username,
-    }
-    # return Response(data, status=status.HTTP_200_OK)
+    print(request.user)
+    return Response({"details": "View hit successfully",}, status.HTTP_200_OK)
 
 
 class RemoveFromCartView(APIView):
