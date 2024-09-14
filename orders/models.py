@@ -20,10 +20,6 @@ class Order(models.Model):
 
     @property
     def purchased_items(self):
-        """
-        Enhance this method.
-        :return: a fucking dict !
-        """
         values = []
         items = self.cart.items.all()
         for item in items:

@@ -4,7 +4,6 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from ...models import Product
-from cart.models import Cart, CartItem
 
 
 class ProductSerializer(ModelSerializer):
@@ -23,23 +22,27 @@ class ProductSerializer(ModelSerializer):
 
     def get_absolute_url(self, obj):
         request = self.context.get('request')
-        return request.build_absolute_uri(
-            reverse("store:api-v1:product-details", kwargs={"slug": obj.slug})
-        )
+        if request:
+            return request.build_absolute_uri(
+                reverse("store:api-v1:product-details", kwargs={"slug": obj.slug})
+            )
+        else:
+            return None
 
     def to_representation(self, instance):
         request = self.context.get("request")
         rep = super().to_representation(instance)
-        slug = request.parser_context.get("kwargs").get('slug')
-        if slug is None:
-            rep.pop("stock", None)
-            rep.pop("size", None)
-            return rep
-        else:
-            rep.pop("absolute_url", None)
-            rep.pop("relative_url", None)
-            return rep
-
+        if request:
+            slug = request.parser_context.get("kwargs").get('slug')
+            if slug is None:
+                rep.pop("stock", None)
+                rep.pop("size", None)
+                return rep
+            else:
+                rep.pop("absolute_url", None)
+                rep.pop("relative_url", None)
+                return rep
+        return rep
 
 class AddToCartSerializer(serializers.Serializer):
     """

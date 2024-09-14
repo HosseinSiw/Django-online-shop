@@ -1,9 +1,10 @@
+from django.shortcuts import get_object_or_404
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
 from rest_framework import status
-from rest_framework.decorators import api_view
-from django.shortcuts import get_object_or_404
+from rest_framework.generics import GenericAPIView, UpdateAPIView
 
 from ...models import Cart, CartItem
 from store.models import Product
@@ -15,6 +16,7 @@ class MyCartViewEndpoint(APIView):
     serializer_class = CartSerializer
 
     def get(self, request, *args, **kwargs):
+        """Retrieve the cart for the authenticated users."""
         user = request.user
         try:
             cart = Cart.objects.get(user=user)
@@ -23,38 +25,21 @@ class MyCartViewEndpoint(APIView):
 
         serializer = self.serializer_class(cart)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    """
-    Todo: Complete this method.
+
     def put(self, request, *args, **kwargs):
-        # user = request.user
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
-    """
-
-
-class MyCartView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = CartSerializer
-
-    def get(self, request, *args, **kwargs):
-        # print(request.user.id)
+        """Update the quantity or details of an item in the cart."""
         user = request.user
-        cart = Cart.objects.filter(user=user).first()
-        if not cart:
-            return Response({
-                'error': 'No cart found for this user.'
-            }, status=status.HTTP_404_NOT_FOUND)
+        try:
+            cart = Cart.objects.get(user=user)
+        except Cart.DoesNotExist:
+            return Response({"details": "Not found a cart"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.serializer_class(cart)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-@api_view(["GET", ])
-def get_cart_by_user_test(request, ):
-    print(request.user)
-    return Response({"details": "View hit successfully", }, status.HTTP_200_OK)
+        data = request.data
+        serializer = self.serializer_class(cart, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RemoveFromCartView(APIView):

@@ -10,19 +10,10 @@ class CartItemSerializer(serializers.ModelSerializer):
         model = CartItem
         fields = ['id', 'product', 'quantity']
 
-
-"""
-class CartSerializer(ModelSerializer):
-    total_price = serializers.SerializerMethodField(source="get_total_price")
-    items = CartItemSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Cart
-        fields = ('user', "items", "total_price")
-
-    def get_total_price(self, obj):
-        return obj.total_price
-"""
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['product'] = ProductSerializer(instance, context=self.context, many=True).data
+        return data
 
 
 class CartSerializer(serializers.ModelSerializer):
