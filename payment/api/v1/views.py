@@ -7,13 +7,23 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+
 from .serializers import PaymentSerializer
 from ...models import PaymentModel
+from cart.models import Cart
 
 
 class PaymentRequestView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request, *args, **kwargs):
-        serializer = PaymentSerializer(data=request.data)
+        user = request.user
+        user_cart = Cart.objects.get(user=user)
+        amount = user_cart.total_price
+        data = {
+            "amount": amount,
+        }
+        serializer = PaymentSerializer(data=data)
         if serializer.is_valid():
             amount = serializer.validated_data['amount']
             zarinpal_request_url = "https://sandbox.zarinpal.com/pg/rest/WebGate/PaymentRequest.json"
@@ -22,17 +32,17 @@ class PaymentRequestView(APIView):
 
             data = {
                 "MerchantID": settings.ZARINPAL_MERCHANT_ID,
-                "Amount": int(amount * 10),  # Zarinpal requires the amount in Toman
+                "Amount": int(amount * 10),
                 "Description": "Payment description",
                 "CallbackURL": settings.ZARINPAL_CALLBACK_URL,
             }
             header = {
                 "Content-Type": "application/json",
             }
-            response = requests.post(zarinpal_request_url, json=json.dump(data,), headers=header)
+            response = requests.post(zarinpal_request_url, json=json.dumps(data,), headers=header)
             result = response.json()
-
-            if result['Status'] == 100:
+            payments_status = result['Status']
+            if payments_status in [100, 101]:
                 # Save payment to the database
                 PaymentModel.objects.create(
                     user=request.user,

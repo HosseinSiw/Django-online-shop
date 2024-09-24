@@ -33,7 +33,7 @@ class Cart(models.Model):
     named: create_user_cart.
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True,)
+    created_at = models.DateTimeField(auto_now_add=True, )
     updated_at = models.DateTimeField(auto_now=True, )
 
     def __str__(self):
@@ -55,6 +55,7 @@ class Cart(models.Model):
 
     def clear_cart(self):
         self.items.all().delete()
+
 
 @receiver(post_save, sender=User)
 def create_user_cart(sender, instance, created, **kwargs):

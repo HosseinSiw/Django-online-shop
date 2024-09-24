@@ -1,5 +1,6 @@
 from datetime import timedelta
 from pathlib import Path
+from django.urls import reverse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -160,7 +161,8 @@ ADMIN_PANEL_URL = '/admin/'  # Change it for make your application more secure
 ADMIN_LOGGING_FILE_PATH = 'logs/admin-logs.logs'
 
 # Zarinpal configs
-MERCHANT_ID = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # Use your own ID here
+ZARINPAL_MERCHANT_ID = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # Use your own ID here
 SANDBOX_MODE = True  # Testing mode enabled
-
+ZARINPAL_SANDBOX = True
 SECURE_SSL_REDIRECT = False
+ZARINPAL_CALLBACK_URL = 'http://127.0.0.1:8000/payment/verify/'
