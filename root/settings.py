@@ -22,11 +22,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # developed apps
     "users.apps.UsersConfig",  # Custom User Application.
     "store.apps.StoreConfig",  # Store app configuration.
     "cart.apps.CartConfig",  # Cart management app.
     "orders.apps.OrdersConfig",  # Order manager application.
     "payment.apps.PaymentConfig",  # Payment managing application
+
+    # Third party apps
     "rest_framework",  # Djagno Rest Framework.
     'rest_framework_simplejwt',  # SimpleJWT Login.
     "drf_yasg",  # API Documentation.
@@ -131,6 +134,11 @@ REST_FRAMEWORK = {
         ),
         "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
+
+PASSWORD_HASHERS = [
+    'hashers.CustomPBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+]
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),

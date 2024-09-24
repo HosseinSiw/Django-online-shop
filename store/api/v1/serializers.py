@@ -1,24 +1,25 @@
 from rest_framework import serializers
-from rest_framework.serializers import ModelSerializer
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from ...models import Product
 
 
-class ProductSerializer(ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     relative_url = serializers.ReadOnlyField(source='get_relative_url')
     absolute_url = serializers.SerializerMethodField(source='get_absolute_url')
     owner_username = serializers.ReadOnlyField(source='get_owner_username')
     owner_id = serializers.ReadOnlyField(source='get_owner_id')
     category_name = serializers.ReadOnlyField(source='get_category_name')
+    average_rate = serializers.ReadOnlyField(source='get_average_rate')
+    reviews = serializers.ReadOnlyField(source='get_reviews')
 
     class Meta:
         model = Product
         fields = ('id', "name",
                   'price', "stock", "size",
                   "absolute_url", "relative_url",
-                  "owner_username", "owner_id", "category_name")
+                  "owner_username", "owner_id", "category_name", "images", "average_rate", "reviews")
 
     def get_absolute_url(self, obj):
         request = self.context.get('request')
@@ -37,12 +38,14 @@ class ProductSerializer(ModelSerializer):
             if slug is None:
                 rep.pop("stock", None)
                 rep.pop("size", None)
+                rep.pop("reviews", None)
                 return rep
             else:
                 rep.pop("absolute_url", None)
                 rep.pop("relative_url", None)
                 return rep
         return rep
+
 
 class AddToCartSerializer(serializers.Serializer):
     """

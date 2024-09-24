@@ -1,18 +1,15 @@
+from django.conf import settings
 from django.db import models
-from django.core.validators import MinValueValidator
-from decimal import Decimal
-
-from django.db.models.signals import post_save
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.template.defaultfilters import slugify
-from django.dispatch import receiver
-
-from users.models import CustomUser as User
-
-from datetime import timedelta
 from django.utils import timezone
+
+from decimal import Decimal
+from datetime import timedelta
 
 
 size_choices = [(int(size), int(size)) for size in range(37, 46)]
+User = settings.AUTH_USER_MODEL
 
 
 class Product(models.Model):
@@ -63,6 +60,19 @@ class Product(models.Model):
     def get_category_name(self):
         return self.category.name
 
+    def get_average_rate(self):
+        if len(self.rates.all()) == 0:
+            return 5
+        else:
+            rates = [int(i.rate) for i in self.rates.all()]
+            return sum(rates) / len(rates)
+
+    def get_reviews(self):
+        if len(self.rates.all()) != 0:
+            return self.rates.all()
+        else:
+            return None
+
 
 class ProductImage(models.Model):
     """
@@ -103,3 +113,10 @@ class Coupon(models.Model):
 
     def __str__(self):
         return f"Code: {self.code}, Days: {self.valid_days}, Expired: {self.expired}"
+
+
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='rates')
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    comment = models.CharField(max_length=50, null=True, blank=True)
