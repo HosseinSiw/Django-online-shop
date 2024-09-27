@@ -19,7 +19,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ('id', "name",
                   'price', "stock", "size",
                   "absolute_url", "relative_url",
-                  "owner_username", "owner_id", "category_name", "images", "average_rate", "reviews")
+                  "owner_username", "owner_id", "category_name", "images", "average_rate", "reviews",)
 
     def get_absolute_url(self, obj):
         request = self.context.get('request')

@@ -26,8 +26,18 @@ services:
       - ./:/mnt/locust
     command: -f /mnt/locust/locustfile.py --master -H http://master:8089
 
+  redis:
+    image: redis:latest
+    restart: always
+    container_name: redis
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - "6379:6379"
+
   worker:
-    image: locustio/locust
-    volumes:
-      - ./:/mnt/locust
-    command: -f /mnt/locust/locustfile.py --worker --master-host master
+    build: .
+    command: celery -A core worker --loglevel=warning
+    restart: always
+    depends_on:
+      - redis
+      - backend

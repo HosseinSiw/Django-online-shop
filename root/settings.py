@@ -1,6 +1,5 @@
 from datetime import timedelta
 from pathlib import Path
-from django.urls import reverse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -174,3 +173,9 @@ SANDBOX_MODE = True  # Testing mode enabled
 ZARINPAL_SANDBOX = True
 SECURE_SSL_REDIRECT = False
 ZARINPAL_CALLBACK_URL = 'http://127.0.0.1:8000/payment/verify/'
+
+
+# Celery configuration
+CELERY_BROKER_URL = 'redis://redis:6379/1'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/1'
+CELERY_TIMEZONE = 'Asia/Tehran'  # Set your timezone

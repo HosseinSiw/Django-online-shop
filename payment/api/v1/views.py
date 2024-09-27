@@ -2,6 +2,7 @@ import json
 import requests
 
 from django.conf import settings
+from mail_templated import EmailMessage
 
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
@@ -13,6 +14,7 @@ from orders.models import Order
 from .serializers import PaymentSerializer
 from ...models import PaymentModel
 from cart.models import Cart
+from .utils import OrderEmailThread
 
 
 """
@@ -61,7 +63,6 @@ class PaymentRequestView(GenericAPIView):
                 "Content-Type": "application/json",
             }
             response = requests.post(zarinpal_request_url, json=json.dumps(data,), headers=header)
-            # print(response)  # Debugging purposes
             result = response.json()
             payments_status = result['Status']
             if payments_status in [100, 101]:
@@ -71,8 +72,9 @@ class PaymentRequestView(GenericAPIView):
                     amount=amount,
                     authority=result['Authority'],
                 )
+
                 order = Order.objects.get(user=request.user, status="S")
-                order.status = "S"  # S represents Shipped status
+                order.status = "S" # S represents Shipped status
                 order.save()
                 return Response({
                     "message": "Payment initiated",
@@ -117,6 +119,13 @@ class PaymentVerifyView(APIView):
                         user=user,
                         cart=user_cart,
                     )
+                    email_message = EmailMessage(
+                        template_name="email/rating_email.tpl",
+                        context={"username": user.username,
+                                 "rate_url": "https//127.0.0.1/"}  # Todo: Change this url to a real one.
+                    )
+
+                    OrderEmailThread(email=email_message).start()  # Sending the notification.
                     return Response({
                         "message": "Payment successful",
                         "ref_id": result['RefID']

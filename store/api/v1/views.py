@@ -21,7 +21,8 @@ class ProductHomeView(generics.ListCreateAPIView):
     queryset = Product.objects.filter(is_active=True)
     pagination_class = CustomProductPaginator
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category', "name")
+    filterset_fields = ('category__name', "name", "price",)
+    search_fields = ('name', "category__name",)
     ordering_fields = ('name',)
 
 
