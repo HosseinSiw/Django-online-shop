@@ -4,6 +4,7 @@ pillow
 
 # API Package
 djangorestframework==3.15.2
+djoser
 django-filter==24.3
 djangorestframework-simplejwt==5.3.1
 

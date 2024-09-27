@@ -120,7 +120,7 @@ class PaymentVerifyView(APIView):
                         cart=user_cart,
                     )
                     email_message = EmailMessage(
-                        template_name="email/rating_email.tpl",
+                        template_name="email/order_confirm.tpl.tpl",
                         context={"username": user.username,
                                  "rate_url": "https//127.0.0.1/"}  # Todo: Change this url to a real one.
                     )

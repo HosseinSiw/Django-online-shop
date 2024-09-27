@@ -13,7 +13,7 @@ class Command(BaseCommand):
     """
     This command will create some random records in database.
     Usage:
-        python manage.py add_product NUMBER_OF_INSTANCES
+        python manage.py add_product NUMBER_OF_INSTANCES: int
         provide the number when you are using it, by default it will create one record and inject it in database.
     """
     def add_arguments(self, parser):

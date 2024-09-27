@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',  # SimpleJWT Login.
     "drf_yasg",  # API Documentation.
     'mail_templated',  # Templated Email sending package.
-
+    'djoser',  # Second version of users app API
     'django_filters',  # Filtering third party application
 ]
 
