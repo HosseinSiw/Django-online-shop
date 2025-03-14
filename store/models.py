@@ -115,8 +115,10 @@ class Coupon(models.Model):
         return f"Code: {self.code}, Days: {self.valid_days}, Expired: {self.expired}"
 
 
+"""
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='rates')
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.CharField(max_length=50, null=True, blank=True)
+"""

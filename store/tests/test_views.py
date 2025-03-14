@@ -11,7 +11,9 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 from decimal import Decimal
-from ..models import Product, Cart, CartItem, Category
+from ..models import Product, Category
+from cart.models import Cart, CartItem
+
 
 """
 class TestProductHomeView(TestCase):

@@ -1,19 +1,18 @@
 from django.conf import settings
 from django.urls import reverse
-from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from ..utils import get_token_for_user
 from rest_framework.generics import GenericAPIView
-from .serializers import UserSerializer, CustomTokenObtainPairSerializer, PasswordResetSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.shortcuts import get_object_or_404
 from mail_templated import EmailMessage
-from ...models import CustomUser as User
-from ..utils import EmailThread
 import jwt
+
+from .serializers import UserSerializer, CustomTokenObtainPairSerializer, PasswordResetSerializer
+from ...models import CustomUser as User
+from ..utils import get_token_for_user, EmailThread
 
 
 class UserRegistrationEndPoint(GenericAPIView):
@@ -30,16 +29,17 @@ class UserRegistrationEndPoint(GenericAPIView):
             serializer.save()
             email = serializer.validated_data['email']
             user_obj = get_object_or_404(User, email=email)
-            token = get_token_for_user(user=user_obj)
-            email_obj = EmailMessage('email/active.tpl',
-                                     {"token": token, "user": user_obj},
-                                     "admin1@admin.com",
-                                     to=[email])
-            EmailThread(email_obj).start()
-            data = {
-                "email": email,
-                "msg": "your account created successfully check your inbox and verify your account",
-            }
+            user_obj.is_verified = True
+            # token = get_token_for_user(user=user_obj)
+            # email_obj = EmailMessage('email/active.tpl',
+            #                          {"token": token, "user": user_obj},
+            #                          "admin1@admin.com",
+            #                          to=[email])
+            # EmailThread(email_obj).start()
+            # data = {
+            #     "email": email,
+            #     "msg": "your account created successfully check your inbox and verify your account",
+            # }
             return Response(data=data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -52,9 +52,9 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 class UserVerificationEndPoint(APIView):
-    def get(self, request, token, *args, **kwargs):
+    def post(self, request, token, *args, **kwargs):
         user_id = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])['user_id']
-        user = User.objects.get(pk=user_id)  # or get_object_or_404(User, id=id)
+        user = User.objects.get(pk=user_id)
         if user is not None and not user.is_verified:
             user.is_verified = True
             user.save()

@@ -4,7 +4,7 @@ from django.db.models.signals import post_save
 from django.core.validators import MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from .managers import CustomUserManager
 
 

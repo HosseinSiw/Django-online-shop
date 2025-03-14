@@ -20,6 +20,7 @@ Faker==28.1.0
 # for dealing with zarinpal api
 requests
 
+celery
 # Testing
 pytest-django==4.9.0
 # Deployment
