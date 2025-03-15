@@ -9,7 +9,8 @@ urlpatterns = [
     # A single product (detail page)
     path('<slug:slug>/', views.ProductDetailView.as_view(), name='product-details'),
     # Add to Card Endpoint.
-    path('cart/add/<int:id>/', views.AddToCartView.as_view(), name='add-to-card'),
+
+    # path('cart/add/<int:id>/', views.AddToCartView.as_view(), name='add-to-card'),
     # View Card Endpoint.
 
     # path('my-cart/', views.MyCartView.as_view(), name='my-card'),

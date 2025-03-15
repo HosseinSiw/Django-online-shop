@@ -7,7 +7,7 @@ from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 
-from ...models import Product
+from ...models import Product as ProductModel
 from .serializers import ProductSerializer, AddToCartSerializer
 from .permissions import IsOwnerOrReadOnly
 from .paginators import CustomProductPaginator
@@ -18,7 +18,7 @@ from cart.models import Cart, CartItem
 class ProductHomeView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
     permission_classes = (permissions.AllowAny,)
-    queryset = Product.objects.filter(is_active=True)
+    queryset = ProductModel.objects.filter(is_active=True)
     pagination_class = CustomProductPaginator
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category__name', "name", "price",)
@@ -34,11 +34,11 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     # queryset = Product.objects.all(), we dont use this type of queryset, instead we use get_queryset method.
 
     def get_queryset(self):
-        return Product.objects.all()
+        return ProductModel.objects.all()
 
     def get_object(self):
         slug = self.kwargs.get('slug')
-        return get_object_or_404(Product, slug=slug)
+        return get_object_or_404(ProductModel, slug=slug)
 
 
 class AddToCartView(APIView):
@@ -54,7 +54,7 @@ class AddToCartView(APIView):
         serializer = self.serializer_class(data=data)
         if serializer.is_valid():
             user = request.user  # Because this endpoint is for authenticated users.
-            product = get_object_or_404(Product, pk=id)
+            product = get_object_or_404(ProductModel, pk=id)
 
             cart = Cart.objects.get(user=user)
 
