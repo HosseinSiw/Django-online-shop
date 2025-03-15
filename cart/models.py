@@ -57,13 +57,14 @@ class Cart(models.Model):
         self.items.all().delete()
 
 
+"""
 @receiver(post_save, sender=User)
 def create_user_cart(sender, instance, created, **kwargs):
-    """
+    '''''
     I used signals to create a new cart whenever a user registered.
     :param sender:  The User model.
     :param instance: The Cart model instance.
     :return: None.
-    """
+    ''''
     if created:
-        Cart.objects.create(user=instance)
+        Cart.objects.create(user=instance)"""

@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from ...models import CustomUser
+from cart.models import Cart
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -21,8 +22,11 @@ class UserSerializer(serializers.ModelSerializer):
         :return: a new user instance
         """
         validated_data.pop('password1', None)
-        return CustomUser.objects.create_user(email=validated_data['email'], password=validated_data['password'],
+        user = CustomUser.objects.create_user(email=validated_data['email'], password=validated_data['password'],
                                               username=validated_data['username'])
+        # Creating the users cart.
+        Cart.objects.create(user=user)
+        return user
 
     def validate(self, attrs):
         """
