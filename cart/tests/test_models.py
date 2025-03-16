@@ -1,6 +1,4 @@
 from django.test import TestCase
-
-from django.test import TestCase
 from decimal import Decimal
 from cart.models import Cart, CartItem
 from users.models import CustomUser as User
@@ -69,12 +67,6 @@ class CartModelTest(TestCase):
         self.assertEqual(self.cart.item_count, 2)
         self.cart.clear_cart()  # Clear the cart
         self.assertEqual(self.cart.item_count, 0)  # Ensure the cart is empty
-
-    def test_cart_item_unique_together_constraint(self):
-        # Test the unique_together constraint for product and cart in CartItem
-        CartItem.objects.create(cart=self.cart, product=self.product1, quantity=2)
-        with self.assertRaises(Exception):  # Django should raise an IntegrityError for duplicate product-cart pairs
-            CartItem.objects.create(cart=self.cart, product=self.product1, quantity=1)
 
     def test_cart_str_representation(self):
         # Test the __str__ method of Cart

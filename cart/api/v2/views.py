@@ -1,3 +1,4 @@
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import permissions
@@ -61,3 +62,14 @@ class AddToCartViewV2(APIView):
                 "product owner": product.owner.username,
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CartClearViewV2(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+      user = request.user
+      cart = Cart.objects.get(user=user)
+      cart.clear_cart()
+      return Response(data={"Message": "Cart has been cleared"},
+                      status=status.HTTP_200_OK)
