@@ -41,39 +41,39 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
         return get_object_or_404(ProductModel, slug=slug)
 
 
-class AddToCartView(APIView):
-    serializer_class = AddToCartSerializer
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def post(self, request, id, *args, **kwargs):
-        quantity = int(request.data.get('quantity', 1))  # Ensure quantity is an integer
-        data = {
-            'product_id': id,
-            'quantity': quantity,
-        }
-        serializer = self.serializer_class(data=data)
-        if serializer.is_valid():
-            user = request.user  # Because this endpoint is for authenticated users.
-            product = get_object_or_404(ProductModel, pk=id)
-
-            cart = Cart.objects.get(user=user)
-
-            # Check if the CartItem already exists; if so, update the quantity.
-            cart_item, created = CartItem.objects.get_or_create(product=product, cart=cart)
-            cart_item.quantity += quantity
-
-            # Validate if the quantity does not exceed available stock
-            if cart_item.quantity > product.stock:
-                return Response({
-                    'error': 'Quantity exceeds available stock.'
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-            cart_item.save()
-
-            return Response({
-                'message': 'Product added to cart',
-                'cart_item_quantity': cart_item.quantity,
-                "product name": product.name,
-                "product owner": product.owner.username,
-            }, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# class AddToCartView(APIView):
+#     serializer_class = AddToCartSerializer
+#     permission_classes = (permissions.IsAuthenticated,)
+#
+#     def post(self, request, id, *args, **kwargs):
+#         quantity = int(request.data.get('quantity', 1))  # Ensure quantity is an integer
+#         data = {
+#             'product_id': id,
+#             'quantity': quantity,
+#         }
+#         serializer = self.serializer_class(data=data)
+#         if serializer.is_valid():
+#             user = request.user  # Because this endpoint is for authenticated users.
+#             product = get_object_or_404(ProductModel, pk=id)
+#
+#             cart = Cart.objects.get(user=user)
+#
+#             # Check if the CartItem already exists; if so, update the quantity.
+#             cart_item, created = CartItem.objects.get_or_create(product=product, cart=cart)
+#             cart_item.quantity += quantity
+#
+#             # Validate if the quantity does not exceed available stock
+#             if cart_item.quantity > product.stock:
+#                 return Response({
+#                     'error': 'Quantity exceeds available stock.'
+#                 }, status=status.HTTP_400_BAD_REQUEST)
+#
+#             cart_item.save()
+#
+#             return Response({
+#                 'message': 'Product added to cart',
+#                 'cart_item_quantity': cart_item.quantity,
+#                 "product name": product.name,
+#                 "product owner": product.owner.username,
+#             }, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
