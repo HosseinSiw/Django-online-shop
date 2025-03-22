@@ -6,6 +6,7 @@ from users.models import CustomUser as User
 from store.models import Product, Category
 
 
+"""
 class CartModelTest(TestCase):
 
     def setUp(self):
@@ -71,5 +72,50 @@ class CartModelTest(TestCase):
     def test_cart_str_representation(self):
         # Test the __str__ method of Cart
         self.assertEqual(str(self.cart), f'Cart of {self.user.username}')
+"""
 
-# Create your tests here.
+class CartModelTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(email='test@test.com', password="123456/a",
+         username="man-in-middle")
+        self.cart = Cart.objects.create(user=self.user)
+        self.category = Category.objects.create(name='TestCategory')
+        self.product1 = Product.objects.create(
+            owner=self.user,
+            name="Product 1",
+            price=Decimal('10.00'),
+            stock=100,
+            size=1,
+            category=self.category
+        )
+        self.product2 = Product.objects.create(
+            owner=self.user,
+            name="Product 2",
+            price=Decimal('20.00'),
+            stock=50,
+            size=2,
+            category=self.category
+        )
+    def test_cart_item_creation(self):
+        cart_item = CartItem.objects.create(cart=self.cart, product=self.product1, quantity=5)
+        self.assertEqual(cart_item.quantity, 5)
+        self.assertEqual(cart_item.cart.user, self.user)
+        self.assertEqual(cart_item.cart, self.cart)
+    
+    def test_cart_item_total_price(self):
+        cart_item = CartItem.objects.create(cart=self.cart, product=self.product1, quantity=10)
+        excepted_price = 100.0
+        self.assertEqual(cart_item.total_price, excepted_price)
+    
+    def test_cart_total_price(self):
+        cart_item_1 = CartItem.objects.create(cart=self.cart, product=self.product1, quantity=2)
+        cart_item_2 = CartItem.objects.create(cart=self.cart, product=self.product2, quantity=5)
+        excepted_price = 120.0
+        self.assertEqual(self.cart.total_price, excepted_price)
+
+    def test_cart_clear(self):
+        cart_item = CartItem.objects.create(cart=self.cart, product=self.product1, quantity=1)
+        self.cart.clear_cart()
+        self.assertEqual(self.cart.item_count, 0)
+    
+        
