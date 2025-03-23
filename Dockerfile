@@ -1,13 +1,16 @@
 FROM python:3.12
 
-ENV PYTHONDONTWRITEBYCODE = 1
-ENV PYTHONUNBUFFERED = 1
+# Prevent .pyc files & force logs to stdout
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+COPY requirements.txt .
+RUN python -m pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-EXPOSE 7000
-CMD ["python", "manage.py", "runserver", "0.0.0.0:7000"]
+
+EXPOSE 8000
+
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]

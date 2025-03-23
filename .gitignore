@@ -1,4 +1,5 @@
 */__pychach__/
+*/__pychach__/*
 venv/
 */migrations
 /users/migrations/

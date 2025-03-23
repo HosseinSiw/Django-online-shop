@@ -6,7 +6,7 @@ services:
     volumes:
       - .:/app
     ports:
-      - "7000:7000"
+      - "8000:8000"
     container_name: "backend"
     command: python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000
 
@@ -14,8 +14,8 @@ services:
     image: rnwood/smtp4dev
     container_name: smtp4dev
     ports:
-      - "3000:80"   # Web interface
-      - "25:25"   # SMTP port
+      - "3000:80"   
+      - "25:25"   
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
   master:
@@ -26,18 +26,18 @@ services:
       - ./:/mnt/locust
     command: -f /mnt/locust/locustfile.py --master -H http://master:8089
 
-  redis:
-    image: redis:latest
-    restart: always
-    container_name: redis
-    command: redis-server --save 60 1 --loglevel warning
-    ports:
-      - "6379:6379"
+  # redis:
+  #   image: redis:latest
+  #   restart: always
+  #   container_name: redis
+  #   command: redis-server --save 60 1 --loglevel warning
+  #   ports:
+  #     - "6379:6379"
 
-  worker:
-    build: .
-    command: celery -A core worker --loglevel=warning
-    restart: always
-    depends_on:
-      - redis
-      - backend
+  # worker:
+  #   build: .
+  #   command: celery -A core worker --loglevel=warning
+  #   restart: always
+  #   depends_on:
+  #     - redis
+  #     - backend
