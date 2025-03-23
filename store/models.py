@@ -60,18 +60,6 @@ class Product(models.Model):
     def get_category_name(self):
         return self.category.name
 
-    def get_average_rate(self):
-        if len(self.rates.all()) == 0:
-            return 5
-        else:
-            rates = [int(i.rate) for i in self.rates.all()]
-            return sum(rates) / len(rates)
-
-    def get_reviews(self):
-        if len(self.rates.all()) != 0:
-            return self.rates.all()
-        else:
-            return None
 
 
 class ProductImage(models.Model):

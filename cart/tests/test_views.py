@@ -5,7 +5,8 @@ from users.models import CustomUser as User
 from ..models import Cart
 
 
-'''class TestCartAPIViews(TestCase):
+'''
+class TestCartAPIViews(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(email='email@email.com', password='123/test/456', username='eraser')
@@ -15,4 +16,5 @@ from ..models import Cart
         add_to_cart_url = reverse('cart:api-v2:add-to-cart')
         print(reverse(add_to_cart_url))
         self.client.force_authenticate(user=self.user)
-        self.assertEqual(2, 2)'''
+        self.assertEqual(2, 2)
+'''

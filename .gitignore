@@ -1,5 +1,5 @@
 */__pychach__/
-venv
+venv/
 */migrations
 /users/migrations/
 logs

@@ -11,15 +11,14 @@ class ProductSerializer(serializers.ModelSerializer):
     owner_username = serializers.ReadOnlyField(source='get_owner_username')
     owner_id = serializers.ReadOnlyField(source='get_owner_id')
     category_name = serializers.ReadOnlyField(source='get_category_name')
-    average_rate = serializers.ReadOnlyField(source='get_average_rate')
-    reviews = serializers.ReadOnlyField(source='get_reviews')
+    
 
     class Meta:
         model = Product
         fields = ('id', "name",
                   'price', "stock", "size",
                   "absolute_url", "relative_url",
-                  "owner_username", "owner_id", "category_name", "images", "average_rate", "reviews",)
+                  "owner_username", "owner_id", "category_name", "images",)
 
     def get_absolute_url(self, obj):
         request = self.context.get('request')
@@ -34,11 +33,10 @@ class ProductSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         rep = super().to_representation(instance)
         if request:
-            slug = request.parser_context.get("kwargs").get('slug')
+            slug = request.parser_context.get("kwargs", {}).get('slug') if request and request.parser_context else None
             if slug is None:
                 rep.pop("stock", None)
                 rep.pop("size", None)
-                rep.pop("reviews", None)
                 return rep
             else:
                 rep.pop("absolute_url", None)
