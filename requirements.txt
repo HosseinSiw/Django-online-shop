@@ -17,6 +17,8 @@ django-mail-templated==2.6.5
 # Fake data generator dependency
 Faker==28.1.0
 
+# Background tasks
+celery
 # for dealing with zarinpal api
 requests
 
